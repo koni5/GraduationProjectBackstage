@@ -1,4 +1,5 @@
 <template>
+	<el-button type="primary" @click="admit">允许浏览器播报</el-button>
 	<!-- 日期选择 -->
 	<div class="demo-date-picker">
 		<div class="block">
@@ -171,14 +172,30 @@
 	</el-dialog>
 </template>
 <script setup>
-	import { onMounted, ref, watch } from "vue";
+	import { onMounted, onUnmounted, ref, watch } from "vue";
 	import { getOrdersAPI } from "@/services/order.js";
 	import { useEmployeeStore } from "@/stores/index.js";
 	import { useOrderDetailStore } from "@/stores/index.js";
+	import { WebSocketService } from "@/services/webSocketService";
+	//允许播放音乐
+	const admit = () => {
+		new Audio("/src/assets/mp3/preview.mp3").play();
+	};
 	//详情仓库
 	const orderDetailStore = useOrderDetailStore();
 	//店员信息仓库
 	let employeeStore = useEmployeeStore();
+	//WebSocket配置
+	const shopId = employeeStore.profile.shopId;
+	const webSocketService = new WebSocketService(
+		`ws://localhost:8080/ws/${shopId}`
+	);
+	const connectWebSocket = () => {
+		webSocketService.connect();
+	};
+	const disconnectWebSocket = () => {
+		webSocketService.disconnect();
+	};
 	//当前tab的状态
 	let status = ref(null);
 	//分页对象
@@ -272,6 +289,12 @@
 			},
 		},
 	];
+	onMounted(() => {
+		connectWebSocket();
+	});
+	onUnmounted(() => {
+		disconnectWebSocket();
+	});
 </script>
 <style lang="scss" scoped>
 	.status3 {
