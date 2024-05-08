@@ -56,6 +56,7 @@
 					接单
 				</el-button>
 				<el-button
+					@click="completeOrder(scope.row.id, scope.row.number)"
 					v-else-if="scope.row.status === 3"
 					size="small"
 					type="danger"
@@ -63,11 +64,12 @@
 					完成
 				</el-button>
 				<el-button
+					@click="(rejectFormVisible = true), (rejectOrderId = scope.row.id)"
 					v-if="scope.row.status > 1 && scope.row.status < 5"
 					size="small"
 					type="danger"
 				>
-					退款
+					拒单
 				</el-button>
 			</template>
 		</el-table-column>
@@ -160,6 +162,12 @@
 							{{ orderDetail.remark || "无" }}
 						</span>
 					</div>
+					<div class="reject" v-if="orderDetail.status === 6">
+						<div>拒单原因</div>
+						<span>
+							{{ orderDetail.rejectionReason }}
+						</span>
+					</div>
 				</div>
 
 				<div class="dish-info">
@@ -175,13 +183,50 @@
 			</div>
 		</el-scrollbar>
 	</el-dialog>
+	<!-- 拒单退款原因对话框 -->
+	<el-dialog v-model="rejectFormVisible" title="拒单原因填写" width="500">
+		<el-input type="textarea" v-model="rejectReason" autocomplete="off" />
+		<template #footer>
+			<div class="dialog-footer">
+				<el-button @click="rejectFormVisible = false">取消</el-button>
+				<el-button type="primary" @click="confirmReject"> 确认拒单</el-button>
+			</div>
+		</template>
+	</el-dialog>
 </template>
 <script setup>
 	import { onMounted, onUnmounted, ref, watch } from "vue";
-	import { getOrdersAPI, receiveOrderAPI } from "@/services/order.js";
+	import {
+		getOrdersAPI,
+		receiveOrderAPI,
+		completeOrderAPI,
+		rejectOrderAPI,
+	} from "@/services/order.js";
 	import { useEmployeeStore } from "@/stores/index.js";
 	import { WebSocketService } from "@/services/webSocketService";
-	import { ElNotification } from "element-plus";
+	import { ElMessage, ElNotification } from "element-plus";
+	//拒单原因对话框显示
+	let rejectFormVisible = ref(false);
+	//拒单原因
+	let rejectReason = ref("");
+	//退款订单id
+	let rejectOrderId = ref();
+	//拒单
+	const confirmReject = async () => {
+		// console.log(rejectOrderId.value)
+		if (rejectReason.value === "") {
+			// 触发信息消息
+			ElMessage({
+				message: "拒单原因不能为空",
+				type: "error",
+				duration: 2000, // 持续时间，2秒后自动关闭
+			});
+		} else {
+			await rejectOrderAPI(rejectOrderId.value, rejectReason.value);
+			rejectFormVisible = false;
+			getOrders(status.value);
+		}
+	};
 	//允许播放音乐
 	const admit = () => {
 		new Audio("/src/assets/mp3/preview.mp3").play();
@@ -252,6 +297,17 @@
 		// 使用 Element Plus 通知显示消息
 		ElNotification({
 			title: "接单成功",
+			type: "success",
+		});
+	};
+	//订单已完成
+	const completeOrder = async (orderId, orderNumber) => {
+		// console.log(orderId + "##" + orderNumber);
+		await completeOrderAPI(orderId);
+		getOrders(status.value);
+		ElNotification({
+			title: "订单完成",
+			message: "订单:" + orderNumber + "完成",
 			type: "success", // 你可以选择 'success', 'warning', 'error', 'info'
 		});
 	};
@@ -400,6 +456,35 @@
 
 				span {
 					color: #f2a402;
+					line-height: 1.15;
+				}
+			}
+			.reject {
+				min-height: 43px;
+				line-height: 43px;
+				background: #fefefe;
+				border: 1px solid #e44d26;
+				border-radius: 4px;
+				margin-top: 10px;
+				padding: 6px;
+				display: flex;
+				align-items: center;
+
+				div {
+					display: inline-block;
+					min-width: 53px;
+					height: 32px;
+					background: #e06c75;
+					border-radius: 4px;
+					text-align: center;
+					line-height: 32px;
+					color: #333;
+					margin-right: 30px;
+					// padding: 12px 6px;
+				}
+
+				span {
+					color: #e06c75;
 					line-height: 1.15;
 				}
 			}
