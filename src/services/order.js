@@ -13,3 +13,9 @@ export const getOrdersAPI = (page, pageSize, shopId, status) => {
         })
     }
 }
+export const receiveOrderAPI = (orderId) => {
+    return http({
+        method: 'PUT',
+        url: `/admin/order/receive/${orderId}`
+    })
+}

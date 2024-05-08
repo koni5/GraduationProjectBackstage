@@ -8,4 +8,3 @@ pinia.use(persist)
 export default pinia;
 export * from "./modules/employee"
 export * from "./modules/sidebar"
-export * from "./modules/orderDetail.js"

@@ -47,23 +47,28 @@
 		<el-table-column type="index" label="操作" align="left" width="500">
 			<template #default="scope">
 				<el-button size="small" @click="getDetail(scope.row)"> 详情</el-button>
-				<el-button v-if="scope.row.status === 2" size="small" type="danger">
-					接单</el-button
+				<el-button
+					@click="receiveOrder(scope.row.id)"
+					v-if="scope.row.status === 2"
+					size="small"
+					type="danger"
 				>
+					接单
+				</el-button>
 				<el-button
 					v-else-if="scope.row.status === 3"
 					size="small"
 					type="danger"
 				>
-					完成</el-button
-				>
+					完成
+				</el-button>
 				<el-button
 					v-if="scope.row.status > 1 && scope.row.status < 5"
 					size="small"
 					type="danger"
 				>
-					退款</el-button
-				>
+					退款
+				</el-button>
 			</template>
 		</el-table-column>
 	</el-table>
@@ -173,16 +178,14 @@
 </template>
 <script setup>
 	import { onMounted, onUnmounted, ref, watch } from "vue";
-	import { getOrdersAPI } from "@/services/order.js";
+	import { getOrdersAPI, receiveOrderAPI } from "@/services/order.js";
 	import { useEmployeeStore } from "@/stores/index.js";
-	import { useOrderDetailStore } from "@/stores/index.js";
 	import { WebSocketService } from "@/services/webSocketService";
+	import { ElNotification } from "element-plus";
 	//允许播放音乐
 	const admit = () => {
 		new Audio("/src/assets/mp3/preview.mp3").play();
 	};
-	//详情仓库
-	const orderDetailStore = useOrderDetailStore();
 	//店员信息仓库
 	let employeeStore = useEmployeeStore();
 	//WebSocket配置
@@ -234,15 +237,25 @@
 		orderSum.value = orderData.total;
 		// console.log(orderSum.value)
 	};
-	//控制订单详情弹窗
-	let drawer = ref(false);
-	//对订单项进行操作
+	//获取订单详情
 	const getDetail = (val) => {
 		// console.log(val)
 		orderDetail.value = val;
 		dialogVisible.value = true;
-		console.log(orderDetail.value);
+		// console.log(orderDetail.value);
 	};
+	//接单
+	const receiveOrder = async (param) => {
+		// console.log(param);
+		await receiveOrderAPI(param);
+		getOrders(status.value);
+		// 使用 Element Plus 通知显示消息
+		ElNotification({
+			title: "接单成功",
+			type: "success", // 你可以选择 'success', 'warning', 'error', 'info'
+		});
+	};
+
 	//切换选项卡
 	const switched = (context) => {
 		let statusName = context.props.label;
@@ -300,6 +313,7 @@
 	.status3 {
 		background: #f56c6c;
 	}
+
 	.order-middle {
 		.user-info {
 			min-height: 140px;
@@ -308,23 +322,29 @@
 
 			padding: 20px 43px;
 			color: #333;
+
 			.user-info-box {
 				min-height: 55px;
 				display: flex;
 				flex-wrap: wrap;
+
 				.user-name {
 					flex: 67%;
 				}
+
 				.user-phone {
 					flex: 33%;
 				}
+
 				.user-getTime {
 					margin-top: 14px;
 					flex: 80%;
+
 					label {
 						margin-right: 3px;
 					}
 				}
+
 				label {
 					margin-right: 17px;
 					color: #666;
@@ -333,11 +353,13 @@
 				.user-address {
 					margin-top: 14px;
 					flex: 80%;
+
 					label {
 						margin-right: 30px;
 					}
 				}
 			}
+
 			.orderCancel {
 				background: #ffffff;
 				border: 1px solid #b6b6b6;
@@ -346,10 +368,12 @@
 					padding: 0 10px;
 					background-color: #e5e4e4;
 				}
+
 				span {
 					color: #f56c6c;
 				}
 			}
+
 			.user-remark {
 				min-height: 43px;
 				line-height: 43px;
@@ -360,6 +384,7 @@
 				padding: 6px;
 				display: flex;
 				align-items: center;
+
 				div {
 					display: inline-block;
 					min-width: 53px;
@@ -372,11 +397,13 @@
 					margin-right: 30px;
 					// padding: 12px 6px;
 				}
+
 				span {
 					color: #f2a402;
 					line-height: 1.15;
 				}
 			}
+
 			.orderCancel {
 				background: #ffffff;
 				border: 1px solid #b6b6b6;
@@ -385,53 +412,65 @@
 					padding: 0 10px;
 					background-color: #e5e4e4;
 				}
+
 				span {
 					color: #f56c6c;
 				}
 			}
 		}
+
 		.dish-info {
 			// min-height: 180px;
 			display: flex;
 			flex-wrap: wrap;
 			padding: 20px 40px;
 			border-bottom: 1px solid #e7e6e6;
+
 			.dish-label {
 				color: #666;
 			}
+
 			.dish-list {
 				flex: 80%;
 				display: flex;
 				flex-wrap: wrap;
+
 				.dish-item {
 					flex: 50%;
 					margin-bottom: 14px;
 					color: #333;
+
 					.dish-num {
 					}
+
 					.dish-item-box {
 						display: inline-block;
 					}
 				}
 			}
+
 			.dish-label {
 				margin-right: 65px;
 			}
+
 			.dish-all-amount {
 				flex: 1;
 				padding-left: 92px;
 				margin-top: 10px;
+
 				label {
 					color: #333333;
 					font-weight: bold;
 					margin-right: 5px;
 				}
+
 				span {
 					color: #f56c6c;
 				}
 			}
 		}
 	}
+
 	.order-top {
 		// height: 80px;
 		border-bottom: 1px solid #e7e6e6;
@@ -442,6 +481,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+
 		.order-status {
 			width: 57.25px;
 			height: 27px;
@@ -452,15 +492,19 @@
 			text-align: center;
 			line-height: 27px;
 		}
+
 		.status3 {
 			background: #f56c6c;
 		}
+
 		p {
 			color: #333;
+
 			label {
 				color: #666;
 			}
 		}
+
 		.order-num {
 			font-size: 16px;
 			color: #2a2929;
@@ -468,6 +512,7 @@
 			display: inline-block;
 		}
 	}
+
 	.order-dialog {
 		.el-dialog {
 			max-height: 764px !important;
@@ -481,10 +526,12 @@
 			max-height: calc(100% - 30px);
 			max-width: calc(100% - 30px);
 		}
+
 		.el-dialog__body {
 			height: 520px !important;
 		}
 	}
+
 	.pagination {
 		padding-top: 20px;
 		width: 500px;
