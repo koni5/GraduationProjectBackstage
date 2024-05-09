@@ -35,7 +35,16 @@
 		:default-sort="{ prop: 'orderTime', order: 'descending' }"
 		style="width: 100%"
 	>
-		<el-table-column prop="orderTime" label="下单时间" width="200" sortable />
+		<el-table-column
+			prop="orderTime"
+			label="下单时间"
+			sortable
+			width="200"
+		>
+			<template #default="scope">
+				{{ new Date(scope.row.orderTime).toLocaleString() }}
+			</template></el-table-column
+		>
 		<el-table-column prop="number" label="订单号" width="200" align="center" />
 		<el-table-column prop="name" label="用户名" width="200" align="center" />
 		<el-table-column

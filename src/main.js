@@ -6,10 +6,14 @@ import pinia from './stores'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'; // 引入中文语言包
+import Echarts from "vue-echarts"
+import * as echarts from "echarts"
 const app = createApp(App)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
+app.component("v-chart", Echarts)
+app.config.globalProperties.$echarts = echarts
 // 使用 Element Plus 并设置中文语言
 app.use(ElementPlus, {
     locale: zhCn, // 设置语言为中文

@@ -1,76 +1,68 @@
 <script setup>
-	import { onMounted, ref, onUnmounted, watchEffect } from "vue";
-	import * as echarts from "echarts";
-
+	import VChart from "vue-echarts";
+	import { ref, defineProps, watch, computed } from "vue";
 	const props = defineProps(["turnoverData"]);
-	const chartInstance = ref(null);
-
-	const updateChart = () => {
-		if (chartInstance.value) {
-			chartInstance.value.setOption({
-				tooltip: {
-					trigger: "axis",
-					axisPointer: {
-						type: "cross",
-						label: {
-							backgroundColor: "#6a7985",
-						},
-					},
-				},
-				xAxis: {
-					type: "time",
-					name: "时间",
-					splitLine: {
-						show: false,
-					},
-					axisLabel: {
-						formatter: function (value) {
-							// 将时间戳转换为日期对象
-							var date = new Date(value);
-							// 获取月份和日期
-							var month = date.getMonth() + 1; // 月份从0开始，因此需要加1
-							var day = date.getDate(); // 获取日期
-							// 返回所需格式
-							return month + "-" + day;
-						},
-						interval: "auto",
-						showMinLabel: true,
-						showMaxLabel: true,
-					},
-				},
-				yAxis: {
-					type: "value",
-					name: "营业额",
-				},
-				series: [
-					{
-						data: props.turnoverData,
-						type: "line",
-					},
-				],
-			});
-		}
-	};
-
-	onMounted(() => {
-		if (!chartInstance.value) {
-			chartInstance.value = echarts.init(document.getElementById("turnOver"));
-		}
-		updateChart();
+	let data = computed(() => {
+		return props.turnoverData;
 	});
-
-	watchEffect(() => {
-		updateChart();
-	});
-
-	onUnmounted(() => {
-		if (chartInstance.value) {
-			chartInstance.value.dispose();
-		}
+	const option = ref({
+		tooltip: {
+			trigger: "axis",
+			axisPointer: {
+				type: "cross",
+				label: {
+					backgroundColor: "#6a7985",
+				},
+			},
+		},
+		xAxis: {
+			type: "time",
+			splitLine: {
+				show: false,
+			},
+			axisLabel: {
+				formatter: function (value) {
+					// 将时间戳转换为日期对象
+					var date = new Date(value);
+					// 获取月份和日期
+					var month = date.getMonth() + 1; // 月份从0开始，因此需要加1
+					var day = date.getDate(); // 获取日期
+					// 返回所需格式
+					return month + "-" + day;
+				},
+				interval: "auto",
+				showMinLabel: true,
+				showMaxLabel: true,
+			},
+		},
+		yAxis: {
+			type: "value",
+		},
+		color: "#52b4fd",
+		series: [
+			{
+				data: data,
+				type: "line",
+			},
+		],
 	});
 </script>
 
 <template>
-	<div :style="{ width: '90%', height: '450px' }" id="turnOver"></div>
+	<el-card class="mgb20" shadow="hover">
+		<template #header>
+			<div class="content-title">营业额统计(￥)</div>
+		</template>
+		<v-chart class="schart" :option="option" />
+	</el-card>
 </template>
-<style scoped></style>
+<style scoped>
+	.schart {
+		height: 400px;
+	}
+	.content-title {
+		font-weight: 400;
+		font-size: 25px;
+		color: #1f2f3d;
+	}
+</style>
