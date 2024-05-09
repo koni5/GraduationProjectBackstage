@@ -22,7 +22,15 @@ const router = createRouter({
             noAuth: true,
           },
           component: () => import("../views/orderList/orderList.vue"),
-        },]
+        }, {
+          path: '/dashBoard',
+          name: 'dashBoard',
+          meta: {
+            title: '仪表板',
+            noAuth: true,
+          },
+          component: () => import("../views/dashBoard/index.vue"),
+        }]
     },
   ]
 })

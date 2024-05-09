@@ -4,17 +4,13 @@
 		<SideBar></SideBar>
 		<div class="content-box" :class="{ 'content-collapse': sidebar.collapse }">
 			<div class="content">
-				<router-view v-slot="{ Component }">
-					<transition name="move" mode="out-in">
-							<component :is="Component"></component>
-					</transition>
-				</router-view>
+				<router-view> </router-view>
 			</div>
 		</div>
 	</div>
 </template>
 <script setup>
-import { useSidebarStore } from '@/stores';
+	import { useSidebarStore } from "@/stores";
 	import Header from "../../components/header.vue";
 	import SideBar from "../../components/sidebar.vue";
 	const sidebar = useSidebarStore();

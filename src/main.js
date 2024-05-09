@@ -5,14 +5,15 @@ import router from './router'
 import pinia from './stores'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-//引入echarts
-import * as echarts from 'echarts';
+import zhCn from 'element-plus/es/locale/lang/zh-cn'; // 引入中文语言包
 const app = createApp(App)
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
-app.config.globalProperties.$echarts = echarts;
-app.use(ElementPlus)
+// 使用 Element Plus 并设置中文语言
+app.use(ElementPlus, {
+    locale: zhCn, // 设置语言为中文
+});
 app.use(pinia)
 app.use(router)
 app.mount('#app')
