@@ -1,10 +1,14 @@
 <template>
 	<el-button type="primary" @click="admit">允许浏览器播报</el-button>
-	<!-- 日期选择 -->
-	<div class="demo-date-picker">
-		<div class="block">
-			<span class="demonstration">选择日期</span>
+	<el-row :gutter="20" style="margin-bottom: 15px">
+		<el-col :span="2"
+			><div class="grid-content ep-bg-purple" />
+			<p style="padding-top: 5px">日期查询:</p></el-col
+		>
+		<el-col :span="8"
+			><div class="grid-content ep-bg-purple" />
 			<el-date-picker
+				@change="onChange"
 				v-model="date"
 				type="daterange"
 				unlink-panels
@@ -13,8 +17,27 @@
 				end-placeholder="End date"
 				:shortcuts="shortcuts"
 			/>
-		</div>
-	</div>
+		</el-col>
+		<el-col :span="2"
+			><div class="grid-content ep-bg-purple" />
+			<p style="padding-top: 5px">订单号查询:</p></el-col
+		>
+		<el-col :span="6"
+			><div class="grid-content ep-bg-purple" />
+			<el-input
+				v-model="params.number"
+				style="width: 240px"
+				placeholder="Please input"
+				clearable
+		/></el-col>
+		<el-col :span="2"
+			><div class="grid-content ep-bg-purple" />
+			<el-button type="primary" @click="getOrders()"
+				>确认查询</el-button
+			></el-col
+		>
+	</el-row>
+
 	<el-tabs
 		@tabClick="switched"
 		tab-position="bottom"
@@ -35,12 +58,7 @@
 		:default-sort="{ prop: 'orderTime', order: 'descending' }"
 		style="width: 100%"
 	>
-		<el-table-column
-			prop="orderTime"
-			label="下单时间"
-			sortable
-			width="200"
-		>
+		<el-table-column prop="orderTime" label="下单时间" sortable width="200">
 			<template #default="scope">
 				{{ new Date(scope.row.orderTime).toLocaleString() }}
 			</template></el-table-column
@@ -74,7 +92,7 @@
 				</el-button>
 				<el-button
 					@click="(rejectFormVisible = true), (rejectOrderId = scope.row.id)"
-					v-if="scope.row.status > 1 && scope.row.status < 5"
+					v-if="scope.row.status > 1 && scope.row.status < 4"
 					size="small"
 					type="danger"
 				>
@@ -214,6 +232,18 @@
 	import { useEmployeeStore } from "@/stores/index.js";
 	import { WebSocketService } from "@/services/webSocketService";
 	import { ElMessage, ElNotification } from "element-plus";
+	//用来格式化日期的库函数
+	import { format } from "date-fns";
+	//选择日期后触发函数
+	const onChange = () => {
+		if (date.value !== null) {
+			params.value.beginTime = format(date.value[0], "yyyy-MM-dd HH:mm:ss");
+			params.value.endTime = format(date.value[1], "yyyy-MM-dd HH:mm:ss");
+		} else {
+			params.value.beginTime = null;
+			params.value.endTime = null;
+		}
+	};
 	//拒单原因对话框显示
 	let rejectFormVisible = ref(false);
 	//拒单原因
@@ -255,17 +285,12 @@
 	};
 	//当前tab的状态
 	let status = ref(null);
-	//分页对象
-	let pageParma = {
-		page: 1,
-		pageSize: 10,
-	};
 	//当前页数
 	let currentPage = ref(1);
 	//监听当前页数变化
 	const watchCurrentPage = watch(currentPage, (newVal, oldVal) => {
-		pageParma.page = newVal;
-		getOrders(status.value);
+		params.value.page = newVal;
+		getOrders();
 	});
 	//弹窗
 	let dialogVisible = ref(false);
@@ -277,14 +302,26 @@
 	let orderData;
 	//订单详情信息
 	let orderDetail = ref();
+	//获取订单查询的参数
+	let params = ref({
+		page: 1,
+		pageSize: 10,
+		number: null,
+		status: undefined,
+		shopId: employeeStore.profile.shopId,
+		beginTime: null,
+		endTime: null,
+	});
 	//获取订单列表的函数
-	const getOrders = async (status) => {
-		let res = await getOrdersAPI(
-			pageParma.page,
-			pageParma.pageSize,
-			employeeStore.profile.shopId,
-			status
+	const getOrders = async () => {
+		// 过滤掉空参数
+		const filteredParams = Object.fromEntries(
+			Object.entries(params.value).filter(
+				([key, value]) => value !== null && value !== "" && value !== undefined
+			)
 		);
+		const queryString = new URLSearchParams(filteredParams).toString();
+		let res = await getOrdersAPI(queryString);
 		// console.log(res.data)
 		orderData = res.data.data;
 		orderTable.value = orderData.records;
@@ -331,12 +368,13 @@
 		else if (statusName === "已完成") status.value = 4;
 		else if (statusName === "已取消") status.value = 5;
 		else status.value = 6;
-		getOrders(status.value);
+		params.value.status = status.value;
+		getOrders();
 	};
 	//选择时间段
-	const date = ref("");
+	const date = ref([]);
 	onMounted(() => {
-		getOrders(status.value);
+		getOrders();
 	});
 	const shortcuts = [
 		{
@@ -634,7 +672,6 @@
 
 	.demo-date-picker {
 		display: flex;
-		width: 100%;
 		padding: 0;
 		flex-wrap: wrap;
 	}
