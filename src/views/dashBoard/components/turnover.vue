@@ -58,7 +58,7 @@
 </template>
 <style scoped>
 	.schart {
-		height: 400px;
+		height: 310px;
 	}
 	.content-title {
 		font-weight: 400;

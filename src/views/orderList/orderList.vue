@@ -44,12 +44,24 @@
 		type="border-card"
 		class="demo-tabs"
 	>
-		<el-tab-pane label="全部订单" tabindex="">全部订单</el-tab-pane>
-		<el-tab-pane label="待接单">待接单</el-tab-pane>
-		<el-tab-pane label="制作中">制作中</el-tab-pane>
-		<el-tab-pane label="已完成">已完成</el-tab-pane>
-		<el-tab-pane label="已取消">已取消</el-tab-pane>
-		<el-tab-pane label="已退款">已退款</el-tab-pane>
+		<el-tab-pane label="全部订单" tabindex="" style="color: #409eff"
+			>全部订单x{{ orderSum }}</el-tab-pane
+		>
+		<el-tab-pane label="待接单" style="color: #409eff"
+			>待接单x{{ orderSum }}</el-tab-pane
+		>
+		<el-tab-pane label="制作中" style="color: #409eff"
+			>制作中x{{ orderSum }}</el-tab-pane
+		>
+		<el-tab-pane label="已完成" style="color: #409eff"
+			>已完成x{{ orderSum }}</el-tab-pane
+		>
+		<el-tab-pane label="已取消" style="color: #409eff"
+			>已取消x{{ orderSum }}</el-tab-pane
+		>
+		<el-tab-pane label="已退款" style="color: #409eff"
+			>已退款x{{ orderSum }}</el-tab-pane
+		>
 	</el-tabs>
 	<el-table
 		table-layout="auto"
@@ -299,7 +311,7 @@
 	//存储订单列表的变量
 	let orderTable = ref();
 	//存储返回的订单信息
-	let orderData;
+	let orderData = ref();
 	//订单详情信息
 	let orderDetail = ref();
 	//获取订单查询的参数
@@ -571,9 +583,6 @@
 					flex: 50%;
 					margin-bottom: 14px;
 					color: #333;
-
-					.dish-num {
-					}
 
 					.dish-item-box {
 						display: inline-block;

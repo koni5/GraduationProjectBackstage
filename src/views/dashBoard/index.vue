@@ -1,4 +1,6 @@
 <template>
+	<DateTimeNow></DateTimeNow>
+	<OverView :businessData="businessData"></OverView>
 	<div class="block">
 		<span class="demonstration" style="font-size: 22px; padding-top: 20px"
 			>选择查询的日期范围
@@ -28,11 +30,16 @@
 	import { onMounted, ref } from "vue";
 	import Turnover from "./components/turnover.vue";
 	import Order from "./components/order.vue";
+	import OverView from "./components/overView.vue";
+	import DateTimeNow from "./components/dateTimeNow.vue";
 	import { getTurnoverAPI, getOrdersAPI } from "@/services/statistics.js";
+	import { getBusinessDataAPI } from "@/services/overview.js";
 	import { format } from "date-fns";
 	import _ from "lodash";
 
+	//存储起始和结束日期
 	const dateValue = ref([]);
+	//日期组件的配置
 	const shortcuts = [
 		{
 			text: "Last week",
@@ -62,6 +69,14 @@
 			},
 		},
 	];
+	//存储今日数据
+	let businessData = ref();
+	//获取今日数据
+	const getBusinessData = async () => {
+		let res = await getBusinessDataAPI();
+		// console.log(res.data.data);
+		businessData.value = res.data.data;
+	};
 	//营业额表的显示数据
 	let turnover_x = ref([]);
 	let turnover_y = ref([]);
@@ -88,11 +103,12 @@
 		getOrders();
 	};
 	onMounted(() => {
-		//初始默认展示上一周的营业额数据
+		//初始默认展示上一周的营业额数据(图表)
 		dateValue.value[0] = format(shortcuts[0].value()[0], "yyyy-MM-dd");
 		dateValue.value[1] = format(shortcuts[0].value()[1], "yyyy-MM-dd");
 		getTurnover();
 		getOrders();
+		getBusinessData();
 	});
 </script>
 <style scoped>
@@ -100,9 +116,10 @@
 		display: flex;
 	}
 	.block {
+		margin-top: 50px;
 		margin-right: 200px;
-		padding: 30px 0;
-		text-align: center;
+		padding: 20px 0;
+		text-align: left;
 		border-right: solid 1px var(--el-border-color);
 		flex: 1;
 	}
