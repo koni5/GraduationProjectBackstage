@@ -1,5 +1,10 @@
 <template>
-	<DateTimeNow></DateTimeNow>
+	<div style="display: flex">
+		<DateTimeNow></DateTimeNow>
+		<div style="margin-left: 700px; margin-top: 10px">
+			<el-button type="success" @click="exportExcel">导出Excel</el-button>
+		</div>
+	</div>
 	<OverView :businessData="businessData"></OverView>
 	<div class="block">
 		<span class="demonstration" style="font-size: 22px; padding-top: 20px"
@@ -32,11 +37,40 @@
 	import Order from "./components/order.vue";
 	import OverView from "./components/overView.vue";
 	import DateTimeNow from "./components/dateTimeNow.vue";
-	import { getTurnoverAPI, getOrdersAPI } from "@/services/statistics.js";
+	import {
+		getTurnoverAPI,
+		getOrdersAPI,
+		getExcelAPI,
+	} from "@/services/statistics.js";
 	import { getBusinessDataAPI } from "@/services/overview.js";
 	import { format } from "date-fns";
 	import _ from "lodash";
 
+	//导出营业数据报表
+	const exportExcel = () => {
+		getExcelAPI()
+			.then((response) => {
+				// 创建一个 Blob 对象
+				const blob = new Blob([response.data], {
+					type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+				});
+
+				// 创建一个临时链接
+				const url = window.URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.href = url;
+				link.download = "shopOperationReport.xlsx"; // 下载的文件名
+				document.body.appendChild(link);
+				link.click();
+
+				// 清理链接和 DOM 元素
+				document.body.removeChild(link);
+				window.URL.revokeObjectURL(url);
+			})
+			.catch((error) => {
+				console.error("下载失败:", error);
+			});
+	};
 	//存储起始和结束日期
 	const dateValue = ref([]);
 	//日期组件的配置
