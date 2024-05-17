@@ -39,7 +39,7 @@
 		<el-col :span="6">
 			<div class="statistic-card">
 				<el-statistic
-					:value="props.businessData?.orderCompletionRate"
+					:value="(outputOrderCompletionRate*100).toFixed(2)"
 					title="New transactions today"
 				>
 					<template #title>
@@ -92,6 +92,17 @@
 	let validOrderCount = ref(0);
 	let outputValidOrderCount = useTransition(validOrderCount, {
 		duration: 1500,
+	});
+	let orderCompletionRate = ref(0);
+	let outputOrderCompletionRate = useTransition(orderCompletionRate, {
+		duration: 1500,
+	});
+	// 监听父组件传来的数据
+	watchEffect(() => {
+		let newOrderCompletionRate = props.businessData?.orderCompletionRate;
+		if (newOrderCompletionRate != null) {
+			orderCompletionRate.value = newOrderCompletionRate; // 当 props 更新时，更新 validOrderCount
+		}
 	});
 	// 监听父组件传来的数据
 	watchEffect(() => {
