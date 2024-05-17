@@ -234,7 +234,7 @@
 	</el-dialog>
 </template>
 <script setup>
-	import { onMounted, onUnmounted, ref, watch } from "vue";
+	import { onMounted, onUnmounted, ref, watch} from "vue";
 	import {
 		getOrdersAPI,
 		receiveOrderAPI,
@@ -290,7 +290,7 @@
 		`ws://localhost:8080/ws/${shopId}`
 	);
 	const connectWebSocket = () => {
-		webSocketService.connect();
+		webSocketService.connect(getOrders);
 	};
 	const disconnectWebSocket = () => {
 		webSocketService.disconnect();

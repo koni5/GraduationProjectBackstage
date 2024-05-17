@@ -9,7 +9,7 @@ export class WebSocketService {
     this.messages = ref();
   }
 
-  connect() {
+  connect(getOrders) {
     if (this.ws) {
       console.warn('WebSocket is already connected');
       return;
@@ -32,7 +32,9 @@ export class WebSocketService {
         message: "订单:" + this.messages.value.orderNumber + " " + this.messages.value.info + "啦", // 从 WebSocket 消息中提取信息
         type: 'info', // 你可以选择 'success', 'warning', 'error', 'info'
       })
-      console.log(this.messages.value)
+      //重新刷新订单列表
+      getOrders()
+      // console.log(this.messages.value)
     };
 
     this.ws.onclose = () => {
